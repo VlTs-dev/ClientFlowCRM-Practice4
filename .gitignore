@@ -1,0 +1,6 @@
+dist/
+environments/
+.runtime/
+.jenkins-home/
+*.log
+*.pid

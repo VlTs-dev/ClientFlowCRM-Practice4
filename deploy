@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="/usr/bin:/bin:$PATH"
+
+target="${1:-}"
+case "$target" in
+  staging|production) ;;
+  *) echo 'Usage: bash deploy staging|production' >&2; exit 2 ;;
+esac
+sha256sum -c dist/SHA256SUMS
+destination="environments/$target"
+mkdir -p "$destination"
+cp dist/clientflowcrm.tar.gz dist/build-info.txt "$destination/"
+{
+  printf 'project=ClientFlowCRM\n'
+  printf 'environment=%s\n' "$target"
+  printf 'build=%s\n' "${BUILD_NUMBER:-local}"
+  printf 'deployed_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf 'mode=educational_simulation\n'
+} > "$destination/deployment.txt"
+printf '[DEPLOY] Training release copied to %s\n' "$destination"

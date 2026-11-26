@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="/usr/bin:/bin:$PATH"
+
+target="${1:-staging}"
+case "$target" in
+  staging|production) ;;
+  *) echo 'Usage: bash smoke-tests staging|production' >&2; exit 2 ;;
+esac
+destination="environments/$target"
+test -s "$destination/clientflowcrm.tar.gz"
+test -s "$destination/deployment.txt"
+grep -qx "environment=$target" "$destination/deployment.txt"
+cmp dist/clientflowcrm.tar.gz "$destination/clientflowcrm.tar.gz"
+cmp dist/build-info.txt "$destination/build-info.txt"
+tar -tzf "$destination/clientflowcrm.tar.gz" >/dev/null
+printf '[SMOKE PASS] %s: package exists, environment marker and release contents are correct\n' "$target"
